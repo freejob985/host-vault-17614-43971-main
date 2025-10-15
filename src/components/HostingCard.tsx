@@ -85,8 +85,8 @@ export function HostingCard({ hosting, onEdit, onDelete, onToggleFavorite }: Hos
   };
 
   const openUrl = () => {
-    // فتح الرابط عبر صفحة الوسيطة المباشرة
-    const proxyUrl = new URL('/auto-login-direct.html', window.location.origin);
+    // فتح الرابط عبر صفحة تجاوز الأمان
+    const proxyUrl = new URL('/auto-login-bypass.html', window.location.origin);
     proxyUrl.searchParams.set('url', hosting.url);
     proxyUrl.searchParams.set('username', hosting.username);
     proxyUrl.searchParams.set('password', hosting.password);
@@ -99,12 +99,12 @@ export function HostingCard({ hosting, onEdit, onDelete, onToggleFavorite }: Hos
     proxyUrl.searchParams.set('submit_button', 'login_submit');
     
     window.open(proxyUrl.toString(), '_blank');
-    toast.success('تم فتح صفحة تسجيل الدخول التلقائي');
+    toast.success('تم فتح صفحة تجاوز الأمان');
   };
 
   const openWithCredentials = () => {
-    // فتح الرابط عبر صفحة الوسيطة المباشرة مع التعبئة والإرسال التلقائي
-    const proxyUrl = new URL('/auto-login-direct.html', window.location.origin);
+    // فتح الرابط عبر صفحة تجاوز الأمان مع التعبئة والإرسال التلقائي
+    const proxyUrl = new URL('/auto-login-bypass.html', window.location.origin);
     proxyUrl.searchParams.set('url', hosting.url);
     proxyUrl.searchParams.set('username', hosting.username);
     proxyUrl.searchParams.set('password', hosting.password);
@@ -121,7 +121,7 @@ export function HostingCard({ hosting, onEdit, onDelete, onToggleFavorite }: Hos
     
     setTimeout(() => {
       window.open(proxyUrl.toString(), '_blank');
-      toast.info('تم فتح صفحة تسجيل الدخول التلقائي - اتبع التعليمات');
+      toast.info('تم فتح صفحة تجاوز الأمان - اختر الطريقة المناسبة');
     }, 100);
   };
 
