@@ -23,7 +23,8 @@ import {
   Globe,
   Key,
   Link2,
-  ClipboardCopy
+  ClipboardCopy,
+  Settings
 } from 'lucide-react';
 import { Hosting, HostingType } from '@/types/hosting';
 import { toast } from 'sonner';
@@ -74,7 +75,7 @@ export function HostingCard({ hosting, onEdit, onDelete, onToggleFavorite }: Hos
 النوع: ${hosting.type}
 الرابط: ${hosting.url}
 اسم المستخدم: ${hosting.username}
-كلمة المرور: ${hosting.password}${hosting.notes ? '\nملاحظات: ' + hosting.notes : ''}${hosting.tags.length > 0 ? '\nالوسوم: ' + hosting.tags.join(', ') : ''}`;
+كلمة المرور: ${hosting.password}${hosting.adminPanelUrl ? '\nلوحة الإدارة: ' + hosting.adminPanelUrl : ''}${hosting.notes ? '\nملاحظات: ' + hosting.notes : ''}${hosting.tags.length > 0 ? '\nالوسوم: ' + hosting.tags.join(', ') : ''}`;
     
     try {
       await navigator.clipboard.writeText(info);
@@ -85,8 +86,8 @@ export function HostingCard({ hosting, onEdit, onDelete, onToggleFavorite }: Hos
   };
 
   const openUrl = () => {
-    // فتح الرابط عبر صفحة تجاوز الأمان
-    const proxyUrl = new URL('/auto-login-bypass.html', window.location.origin);
+    // فتح الرابط عبر صفحة الحلول المتقدمة
+    const proxyUrl = new URL('/auto-login-advanced.html', window.location.origin);
     proxyUrl.searchParams.set('url', hosting.url);
     proxyUrl.searchParams.set('username', hosting.username);
     proxyUrl.searchParams.set('password', hosting.password);
@@ -99,12 +100,12 @@ export function HostingCard({ hosting, onEdit, onDelete, onToggleFavorite }: Hos
     proxyUrl.searchParams.set('submit_button', 'login_submit');
     
     window.open(proxyUrl.toString(), '_blank');
-    toast.success('تم فتح صفحة تجاوز الأمان');
+    toast.success('تم فتح صفحة الحلول المتقدمة');
   };
 
   const openWithCredentials = () => {
-    // فتح الرابط عبر صفحة تجاوز الأمان مع التعبئة والإرسال التلقائي
-    const proxyUrl = new URL('/auto-login-bypass.html', window.location.origin);
+    // فتح الرابط عبر صفحة الحلول المتقدمة مع التعبئة والإرسال التلقائي
+    const proxyUrl = new URL('/auto-login-advanced.html', window.location.origin);
     proxyUrl.searchParams.set('url', hosting.url);
     proxyUrl.searchParams.set('username', hosting.username);
     proxyUrl.searchParams.set('password', hosting.password);
@@ -121,7 +122,46 @@ export function HostingCard({ hosting, onEdit, onDelete, onToggleFavorite }: Hos
     
     setTimeout(() => {
       window.open(proxyUrl.toString(), '_blank');
-      toast.info('تم فتح صفحة تجاوز الأمان - اختر الطريقة المناسبة');
+      toast.info('تم فتح صفحة الحلول المتقدمة - حل مشاكل الجلسة');
+    }, 100);
+  };
+
+  const openAdminPanel = () => {
+    if (!hosting.adminPanelUrl) {
+      toast.error('لم يتم تحديد رابط لوحة الإدارة');
+      return;
+    }
+    
+    // فتح رابط لوحة الإدارة عبر صفحة تجاوز الأمان
+    const proxyUrl = new URL('/auto-login-bypass.html', window.location.origin);
+    proxyUrl.searchParams.set('url', hosting.adminPanelUrl);
+    proxyUrl.searchParams.set('username', hosting.username);
+    proxyUrl.searchParams.set('password', hosting.password);
+    proxyUrl.searchParams.set('auto_submit', 'false');
+    
+    window.open(proxyUrl.toString(), '_blank');
+    toast.success('تم فتح لوحة الإدارة');
+  };
+
+  const openAdminPanelWithCredentials = () => {
+    if (!hosting.adminPanelUrl) {
+      toast.error('لم يتم تحديد رابط لوحة الإدارة');
+      return;
+    }
+    
+    // فتح رابط لوحة الإدارة عبر صفحة تجاوز الأمان مع التعبئة التلقائية
+    const proxyUrl = new URL('/auto-login-bypass.html', window.location.origin);
+    proxyUrl.searchParams.set('url', hosting.adminPanelUrl);
+    proxyUrl.searchParams.set('username', hosting.username);
+    proxyUrl.searchParams.set('password', hosting.password);
+    proxyUrl.searchParams.set('auto_submit', 'true');
+    
+    // نسخ اسم المستخدم كنسخة احتياطية
+    copyToClipboard(hosting.username, 'اسم المستخدم (نسخة احتياطية)');
+    
+    setTimeout(() => {
+      window.open(proxyUrl.toString(), '_blank');
+      toast.info('تم فتح لوحة الإدارة مع التعبئة التلقائية');
     }, 100);
   };
 
@@ -132,6 +172,7 @@ export function HostingCard({ hosting, onEdit, onDelete, onToggleFavorite }: Hos
       url: hosting.url,
       username: hosting.username,
       password: hosting.password,
+      adminPanelUrl: hosting.adminPanelUrl || '',
       notes: hosting.notes || '',
       tags: hosting.tags.join(','),
       autoOpen: 'true'
@@ -265,6 +306,28 @@ export function HostingCard({ hosting, onEdit, onDelete, onToggleFavorite }: Hos
             فتح الرابط
           </Button>
         </div>
+        
+        {hosting.adminPanelUrl && (
+          <div className="flex gap-2">
+            <Button
+              variant="secondary"
+              className="flex-1"
+              onClick={openAdminPanelWithCredentials}
+            >
+              <Settings className="w-4 h-4 ml-2" />
+              لوحة الإدارة + بيانات
+            </Button>
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={openAdminPanel}
+            >
+              <Settings className="w-4 h-4 ml-2" />
+              لوحة الإدارة
+            </Button>
+          </div>
+        )}
+        
         <Button
           variant="secondary"
           className="w-full"
@@ -290,6 +353,21 @@ export function HostingCard({ hosting, onEdit, onDelete, onToggleFavorite }: Hos
           <ExternalLink className="w-4 h-4 ml-2" />
           فتح الرابط فقط
         </ContextMenuItem>
+        
+        {hosting.adminPanelUrl && (
+          <>
+            <ContextMenuSeparator />
+            <ContextMenuItem onClick={openAdminPanelWithCredentials}>
+              <Settings className="w-4 h-4 ml-2" />
+              فتح لوحة الإدارة + بيانات
+            </ContextMenuItem>
+            <ContextMenuItem onClick={openAdminPanel}>
+              <Settings className="w-4 h-4 ml-2" />
+              فتح لوحة الإدارة فقط
+            </ContextMenuItem>
+          </>
+        )}
+        
         <ContextMenuSeparator />
         <ContextMenuItem onClick={copyAllInfo}>
           <ClipboardCopy className="w-4 h-4 ml-2" />
@@ -297,8 +375,14 @@ export function HostingCard({ hosting, onEdit, onDelete, onToggleFavorite }: Hos
         </ContextMenuItem>
         <ContextMenuItem onClick={() => copyToClipboard(hosting.url, 'الرابط')}>
           <Copy className="w-4 h-4 ml-2" />
-          نسخ الرابط
+          نسخ رابط لوحة التحكم
         </ContextMenuItem>
+        {hosting.adminPanelUrl && (
+          <ContextMenuItem onClick={() => copyToClipboard(hosting.adminPanelUrl, 'رابط لوحة الإدارة')}>
+            <Copy className="w-4 h-4 ml-2" />
+            نسخ رابط لوحة الإدارة
+          </ContextMenuItem>
+        )}
         <ContextMenuItem onClick={() => copyToClipboard(hosting.username, 'اسم المستخدم')}>
           <Copy className="w-4 h-4 ml-2" />
           نسخ اسم المستخدم

@@ -36,6 +36,7 @@ const hostingSchema = z.object({
   url: z.string().url('رابط غير صالح').max(255),
   username: z.string().min(1, 'اسم المستخدم مطلوب').max(100),
   password: z.string().min(1, 'كلمة المرور مطلوبة').max(255),
+  adminPanelUrl: z.string().url('رابط غير صالح').optional().or(z.literal('')),
   notes: z.string().max(1000).optional(),
   tags: z.array(z.string()).default([]),
   favorite: z.boolean().default(false),
@@ -67,6 +68,7 @@ export function HostingDialog({ open, hosting, onClose, onSave }: HostingDialogP
       url: '',
       username: '',
       password: '',
+      adminPanelUrl: '',
       notes: '',
       tags: [],
       favorite: false,
@@ -81,6 +83,7 @@ export function HostingDialog({ open, hosting, onClose, onSave }: HostingDialogP
         url: hosting.url,
         username: hosting.username,
         password: hosting.password,
+        adminPanelUrl: hosting.adminPanelUrl || '',
         notes: hosting.notes || '',
         tags: hosting.tags,
         favorite: hosting.favorite || false,
@@ -92,6 +95,7 @@ export function HostingDialog({ open, hosting, onClose, onSave }: HostingDialogP
         url: '',
         username: '',
         password: '',
+        adminPanelUrl: '',
         notes: '',
         tags: [],
         favorite: false,
@@ -161,6 +165,24 @@ export function HostingDialog({ open, hosting, onClose, onSave }: HostingDialogP
                   <FormControl>
                     <Input 
                       placeholder="https://example.com:2083" 
+                      dir="ltr"
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="adminPanelUrl"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>رابط لوحة الإدارة (اختياري)</FormLabel>
+                  <FormControl>
+                    <Input 
+                      placeholder="https://admin.example.com أو https://example.com/admin" 
                       dir="ltr"
                       {...field} 
                     />

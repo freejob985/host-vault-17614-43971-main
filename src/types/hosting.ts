@@ -7,6 +7,7 @@ export interface Hosting {
   url: string;
   username: string;
   password: string;
+  adminPanelUrl?: string;
   notes?: string;
   tags: string[];
   createdAt: string;
@@ -20,6 +21,7 @@ export interface HostingFormData {
   url: string;
   username: string;
   password: string;
+  adminPanelUrl?: string;
   notes?: string;
   tags: string[];
   favorite?: boolean;

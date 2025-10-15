@@ -80,6 +80,7 @@ const Index = () => {
     const url = params.get('url');
     const username = params.get('username');
     const password = params.get('password');
+    const adminPanelUrl = params.get('adminPanelUrl');
     const notes = params.get('notes');
     const tags = params.get('tags');
     const autoOpen = params.get('autoOpen');
@@ -91,6 +92,7 @@ const Index = () => {
         url: decodeURIComponent(url),
         username: decodeURIComponent(username),
         password: password ? decodeURIComponent(password) : '',
+        adminPanelUrl: adminPanelUrl ? decodeURIComponent(adminPanelUrl) : '',
         notes: notes ? decodeURIComponent(notes) : '',
         tags: tags ? decodeURIComponent(tags).split(',').filter(t => t) : [],
         favorite: false,
