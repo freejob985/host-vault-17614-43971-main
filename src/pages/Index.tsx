@@ -10,7 +10,9 @@ import {
   Upload,
   Trash2,
   Star,
-  Server
+  Server,
+  ChevronUp,
+  ChevronDown
 } from 'lucide-react';
 import {
   Pagination,
@@ -32,6 +34,7 @@ import { Badge } from '@/components/ui/badge';
 import { HostingCard } from '@/components/HostingCard';
 import { HostingDialog } from '@/components/HostingDialog';
 import { ImportExportDialog } from '@/components/ImportExportDialog';
+import { TagsFilter } from '@/components/TagsFilter';
 import { Hosting, HostingFormData, HostingType } from '@/types/hosting';
 import { saveHostings, loadHostings, exportHostings, importHostings, clearAllData } from '@/lib/storage';
 import { toast } from 'sonner';
@@ -52,6 +55,11 @@ const Index = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<HostingType | 'all'>('all');
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [isHeaderCollapsed, setIsHeaderCollapsed] = useState(() => {
+    const saved = localStorage.getItem('headerCollapsed');
+    return saved ? JSON.parse(saved) : false;
+  });
   const [dialogOpen, setDialogOpen] = useState(false);
   const [importExportOpen, setImportExportOpen] = useState(false);
   const [deleteAllDialog, setDeleteAllDialog] = useState(false);
@@ -127,6 +135,13 @@ const Index = () => {
       filtered = filtered.filter(h => h.type === filterType);
     }
 
+    // فلترة حسب التاجات
+    if (selectedTags.length > 0) {
+      filtered = filtered.filter(h =>
+        selectedTags.some(tag => h.tags.includes(tag))
+      );
+    }
+
     // البحث
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
@@ -145,7 +160,7 @@ const Index = () => {
       if (!a.favorite && b.favorite) return 1;
       return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
     });
-  }, [hostings, searchQuery, filterType, showFavoritesOnly]);
+  }, [hostings, searchQuery, filterType, showFavoritesOnly, selectedTags]);
 
   // Pagination
   const totalPages = Math.ceil(filteredHostings.length / itemsPerPage);
@@ -157,7 +172,7 @@ const Index = () => {
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, filterType, showFavoritesOnly]);
+  }, [searchQuery, filterType, showFavoritesOnly, selectedTags]);
 
   const handleSave = (data: HostingFormData) => {
     if (editingHosting) {
@@ -227,10 +242,29 @@ const Index = () => {
     toast.success('تم حذف جميع البيانات');
   };
 
+  const handleTagToggle = (tag: string) => {
+    setSelectedTags(prev => 
+      prev.includes(tag) 
+        ? prev.filter(t => t !== tag)
+        : [...prev, tag]
+    );
+  };
+
+  const handleClearAllTags = () => {
+    setSelectedTags([]);
+  };
+
+  const handleToggleHeader = () => {
+    const newState = !isHeaderCollapsed;
+    setIsHeaderCollapsed(newState);
+    localStorage.setItem('headerCollapsed', JSON.stringify(newState));
+  };
+
   const stats = {
     total: hostings.length,
     favorites: hostings.filter(h => h.favorite).length,
     cpanel: hostings.filter(h => h.type === 'cpanel').length,
+    tags: new Set(hostings.flatMap(h => h.tags)).size,
   };
 
   if (showSplash) {
@@ -255,6 +289,14 @@ const Index = () => {
               </div>
             </div>
             <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handleToggleHeader}
+                title={isHeaderCollapsed ? "إظهار الفلاتر" : "إخفاء الفلاتر"}
+              >
+                {isHeaderCollapsed ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
+              </Button>
               <ThemeToggle />
               <Button
                 variant="outline"
@@ -276,7 +318,7 @@ const Index = () => {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-3 gap-3 mb-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
             <div className="bg-primary/10 rounded-lg p-3 text-center">
               <p className="text-2xl font-bold text-primary">{stats.total}</p>
               <p className="text-xs text-muted-foreground">إجمالي الاستضافات</p>
@@ -291,45 +333,65 @@ const Index = () => {
               <p className="text-2xl font-bold text-accent">{stats.cpanel}</p>
               <p className="text-xs text-muted-foreground">cPanel</p>
             </div>
+            <div className="bg-green-500/10 rounded-lg p-3 text-center">
+              <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                {stats.tags}
+              </p>
+              <p className="text-xs text-muted-foreground">التاجات</p>
+            </div>
           </div>
 
-          {/* Search and Filters */}
-          <div className="flex flex-col sm:flex-row gap-3">
-            <div className="relative flex-1">
-              <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                placeholder="ابحث عن استضافة..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pr-10"
-              />
+          {/* Search and Filters - Collapsible */}
+          {!isHeaderCollapsed && (
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="relative flex-1">
+                <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="ابحث عن استضافة..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pr-10"
+                />
+              </div>
+              <Select value={filterType} onValueChange={(v) => setFilterType(v as HostingType | 'all')}>
+                <SelectTrigger className="w-full sm:w-[180px]">
+                  <Filter className="w-4 h-4 ml-2" />
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">جميع الأنواع</SelectItem>
+                  <SelectItem value="cpanel">cPanel</SelectItem>
+                  <SelectItem value="plesk">Plesk</SelectItem>
+                  <SelectItem value="directadmin">DirectAdmin</SelectItem>
+                  <SelectItem value="wordpress">WordPress</SelectItem>
+                  <SelectItem value="ftp">FTP</SelectItem>
+                  <SelectItem value="ssh">SSH</SelectItem>
+                  <SelectItem value="other">أخرى</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button
+                variant={showFavoritesOnly ? 'default' : 'outline'}
+                onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
+                className="w-full sm:w-auto"
+              >
+                <Star className={showFavoritesOnly ? 'fill-current' : ''} />
+              </Button>
             </div>
-            <Select value={filterType} onValueChange={(v) => setFilterType(v as HostingType | 'all')}>
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <Filter className="w-4 h-4 ml-2" />
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">جميع الأنواع</SelectItem>
-                <SelectItem value="cpanel">cPanel</SelectItem>
-                <SelectItem value="plesk">Plesk</SelectItem>
-                <SelectItem value="directadmin">DirectAdmin</SelectItem>
-                <SelectItem value="wordpress">WordPress</SelectItem>
-                <SelectItem value="ftp">FTP</SelectItem>
-                <SelectItem value="ssh">SSH</SelectItem>
-                <SelectItem value="other">أخرى</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button
-              variant={showFavoritesOnly ? 'default' : 'outline'}
-              onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
-              className="w-full sm:w-auto"
-            >
-              <Star className={showFavoritesOnly ? 'fill-current' : ''} />
-            </Button>
-          </div>
+          )}
         </div>
       </header>
+
+      {/* Tags Filter - Always Visible */}
+      <div className="border-b bg-card/50 backdrop-blur-sm">
+        <div className="container mx-auto px-4 py-4">
+          <TagsFilter
+            hostings={hostings}
+            selectedTags={selectedTags}
+            onTagToggle={handleTagToggle}
+            onClearAll={handleClearAllTags}
+          />
+        </div>
+      </div>
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6">

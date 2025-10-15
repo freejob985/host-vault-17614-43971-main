@@ -641,6 +641,387 @@
         }, 10000);
     }
 
+    // ===== قائمة السياق الكاملة =====
+    function createContextMenu() {
+        // إزالة القائمة القديمة إذا كانت موجودة
+        const existingMenu = document.getElementById('auto-login-context-menu');
+        if (existingMenu) {
+            existingMenu.remove();
+        }
+
+        // إنشاء قائمة السياق
+        const contextMenu = document.createElement('div');
+        contextMenu.id = 'auto-login-context-menu';
+        contextMenu.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 999999;
+            background: rgba(0, 0, 0, 0.1);
+            display: none;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        `;
+
+        const menuPanel = document.createElement('div');
+        menuPanel.style.cssText = `
+            position: absolute;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            min-width: 280px;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+            direction: rtl;
+            text-align: right;
+        `;
+
+        // محتوى القائمة
+        menuPanel.innerHTML = `
+            <div style="padding: 16px; border-bottom: 1px solid #eee;">
+                <h3 style="margin: 0 0 8px 0; color: #333; font-size: 16px; font-weight: 600;">
+                    🔐 Auto Login Helper
+                </h3>
+                <p style="margin: 0; color: #666; font-size: 12px;">
+                    أداة تسجيل الدخول التلقائي - الإصدار 2.0
+                </p>
+            </div>
+            
+            <div style="padding: 8px 0;">
+                <div class="menu-item" data-action="status" style="padding: 12px 16px; cursor: pointer; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 16px;">📊</span>
+                    <div>
+                        <div style="font-weight: 500; color: #333;">حالة النظام</div>
+                        <div style="font-size: 11px; color: #666;">عرض معلومات التعبئة التلقائية</div>
+                    </div>
+                </div>
+                
+                <div class="menu-item" data-action="test" style="padding: 12px 16px; cursor: pointer; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 16px;">🧪</span>
+                    <div>
+                        <div style="font-weight: 500; color: #333;">اختبار التعبئة</div>
+                        <div style="font-size: 11px; color: #666;">اختبار ملء الحقول يدوياً</div>
+                    </div>
+                </div>
+                
+                <div class="menu-item" data-action="fields" style="padding: 12px 16px; cursor: pointer; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 16px;">🔍</span>
+                    <div>
+                        <div style="font-weight: 500; color: #333;">فحص الحقول</div>
+                        <div style="font-size: 11px; color: #666;">عرض جميع حقول الإدخال الموجودة</div>
+                    </div>
+                </div>
+                
+                <div class="menu-item" data-action="forms" style="padding: 12px 16px; cursor: pointer; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 16px;">📝</span>
+                    <div>
+                        <div style="font-weight: 500; color: #333;">فحص النماذج</div>
+                        <div style="font-size: 11px; color: #666;">عرض جميع النماذج في الصفحة</div>
+                    </div>
+                </div>
+                
+                <div class="menu-item" data-action="submit" style="padding: 12px 16px; cursor: pointer; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 16px;">🚀</span>
+                    <div>
+                        <div style="font-weight: 500; color: #333;">إرسال النموذج</div>
+                        <div style="font-size: 11px; color: #666;">محاولة إرسال النموذج الحالي</div>
+                    </div>
+                </div>
+                
+                <div class="menu-item" data-action="clear" style="padding: 12px 16px; cursor: pointer; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 16px;">🧹</span>
+                    <div>
+                        <div style="font-weight: 500; color: #333;">مسح الحقول</div>
+                        <div style="font-size: 11px; color: #666;">مسح جميع حقول الإدخال</div>
+                    </div>
+                </div>
+                
+                <div class="menu-item" data-action="help" style="padding: 12px 16px; cursor: pointer; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 16px;">❓</span>
+                    <div>
+                        <div style="font-weight: 500; color: #333;">المساعدة</div>
+                        <div style="font-size: 11px; color: #666;">عرض دليل الاستخدام</div>
+                    </div>
+                </div>
+                
+                <div class="menu-item" data-action="close" style="padding: 12px 16px; cursor: pointer; display: flex; align-items: center; gap: 8px; background: #f8f9fa;">
+                    <span style="font-size: 16px;">❌</span>
+                    <div>
+                        <div style="font-weight: 500; color: #333;">إغلاق</div>
+                        <div style="font-size: 11px; color: #666;">إغلاق قائمة السياق</div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // إضافة تأثيرات hover
+        const style = document.createElement('style');
+        style.textContent = `
+            .menu-item:hover {
+                background-color: #f0f8ff !important;
+            }
+            .menu-item:active {
+                background-color: #e6f3ff !important;
+            }
+        `;
+        document.head.appendChild(style);
+
+        contextMenu.appendChild(menuPanel);
+        document.body.appendChild(contextMenu);
+
+        // معالجة النقرات
+        menuPanel.addEventListener('click', (e) => {
+            const menuItem = e.target.closest('.menu-item');
+            if (!menuItem) return;
+
+            const action = menuItem.dataset.action;
+            handleContextMenuAction(action);
+            contextMenu.style.display = 'none';
+        });
+
+        // إغلاق عند النقر خارج القائمة
+        contextMenu.addEventListener('click', (e) => {
+            if (e.target === contextMenu) {
+                contextMenu.style.display = 'none';
+            }
+        });
+
+        return contextMenu;
+    }
+
+    // معالجة إجراءات قائمة السياق
+    function handleContextMenuAction(action) {
+        switch (action) {
+            case 'status':
+                showStatus();
+                break;
+            case 'test':
+                testAutoFill();
+                break;
+            case 'fields':
+                inspectFields();
+                break;
+            case 'forms':
+                inspectForms();
+                break;
+            case 'submit':
+                submitForm();
+                break;
+            case 'clear':
+                clearFields();
+                break;
+            case 'help':
+                showHelp();
+                break;
+            case 'close':
+                // إغلاق القائمة
+                break;
+        }
+    }
+
+    // عرض حالة النظام
+    function showStatus() {
+        const usernameField = findInputField(USERNAME_PATTERNS, 'اسم المستخدم');
+        const passwordField = findInputField(PASSWORD_PATTERNS, 'كلمة المرور');
+        
+        let status = '📊 حالة نظام Auto Login Helper\n\n';
+        status += `🔗 URL: ${window.location.href}\n`;
+        status += `📅 الوقت: ${new Date().toLocaleString('ar-SA')}\n\n`;
+        
+        status += `👤 اسم المستخدم:\n`;
+        status += `  - متوفر: ${username ? 'نعم' : 'لا'}\n`;
+        status += `  - الحقل: ${usernameField ? 'موجود' : 'غير موجود'}\n`;
+        status += `  - القيمة: ${usernameField ? usernameField.value : 'غير محدد'}\n\n`;
+        
+        status += `🔒 كلمة المرور:\n`;
+        status += `  - متوفر: ${password ? 'نعم' : 'لا'}\n`;
+        status += `  - الحقل: ${passwordField ? 'موجود' : 'غير موجود'}\n`;
+        status += `  - القيمة: ${passwordField ? 'مملوء' : 'فارغ'}\n\n`;
+        
+        status += `⚙️ الإعدادات:\n`;
+        status += `  - الإرسال التلقائي: ${autoSubmit === 'true' ? 'مفعل' : 'معطل'}\n`;
+        status += `  - عدد المحاولات: ${attemptCount}/${maxAttempts}\n`;
+        
+        alert(status);
+    }
+
+    // اختبار التعبئة التلقائية
+    function testAutoFill() {
+        if (!username || !password) {
+            alert('❌ لا توجد بيانات تسجيل دخول متاحة للاختبار');
+            return;
+        }
+        
+        console.log('🧪 بدء اختبار التعبئة التلقائية...');
+        autoFillAndSubmit();
+        alert('✅ تم تشغيل اختبار التعبئة التلقائية');
+    }
+
+    // فحص الحقول
+    function inspectFields() {
+        const inputs = document.querySelectorAll('input');
+        let fieldsInfo = '🔍 حقول الإدخال الموجودة:\n\n';
+        
+        if (inputs.length === 0) {
+            fieldsInfo += 'لا توجد حقول إدخال في الصفحة';
+        } else {
+            inputs.forEach((input, index) => {
+                fieldsInfo += `${index + 1}. نوع: ${input.type}\n`;
+                fieldsInfo += `   اسم: ${input.name || 'غير محدد'}\n`;
+                fieldsInfo += `   معرف: ${input.id || 'غير محدد'}\n`;
+                fieldsInfo += `   placeholder: ${input.placeholder || 'غير محدد'}\n`;
+                fieldsInfo += `   قيمة: ${input.value || 'فارغ'}\n`;
+                fieldsInfo += `   مطلوب: ${input.required ? 'نعم' : 'لا'}\n`;
+                fieldsInfo += `   معطل: ${input.disabled ? 'نعم' : 'لا'}\n\n`;
+            });
+        }
+        
+        alert(fieldsInfo);
+    }
+
+    // فحص النماذج
+    function inspectForms() {
+        const forms = document.querySelectorAll('form');
+        let formsInfo = '📝 النماذج الموجودة:\n\n';
+        
+        if (forms.length === 0) {
+            formsInfo += 'لا توجد نماذج في الصفحة';
+        } else {
+            forms.forEach((form, index) => {
+                formsInfo += `${index + 1}. معرف: ${form.id || 'غير محدد'}\n`;
+                formsInfo += `   اسم: ${form.name || 'غير محدد'}\n`;
+                formsInfo += `   action: ${form.action || 'غير محدد'}\n`;
+                formsInfo += `   method: ${form.method || 'GET'}\n`;
+                
+                const inputs = form.querySelectorAll('input');
+                formsInfo += `   حقول الإدخال: ${inputs.length}\n`;
+                
+                const passwordFields = form.querySelectorAll('input[type="password"]');
+                formsInfo += `   حقول كلمة المرور: ${passwordFields.length}\n\n`;
+            });
+        }
+        
+        alert(formsInfo);
+    }
+
+    // مسح الحقول
+    function clearFields() {
+        const inputs = document.querySelectorAll('input[type="text"], input[type="email"], input[type="password"]');
+        let clearedCount = 0;
+        
+        inputs.forEach(input => {
+            if (input.value) {
+                input.value = '';
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+                input.dispatchEvent(new Event('change', { bubbles: true }));
+                clearedCount++;
+            }
+        });
+        
+        alert(`🧹 تم مسح ${clearedCount} حقل`);
+    }
+
+    // عرض المساعدة
+    function showHelp() {
+        const help = `❓ دليل استخدام Auto Login Helper
+
+🔧 الميزات:
+• ملء حقول تسجيل الدخول تلقائياً
+• دعم جميع أنواع لوحات التحكم (cPanel, Plesk, DirectAdmin, WordPress)
+• إرسال النماذج تلقائياً
+• دعم postMessage للتواصل مع النوافذ الأخرى
+
+📋 كيفية الاستخدام:
+1. أضف البيانات في URL:
+   ?username=اسم_المستخدم&password=كلمة_المرور&auto_submit=true
+
+2. أو استخدم postMessage:
+   window.postMessage({
+     type: 'AUTO_FILL_DATA',
+     username: 'اسم_المستخدم',
+     password: 'كلمة_المرور',
+     autoSubmit: true
+   }, '*');
+
+🎯 المعاملات المدعومة:
+• username: اسم المستخدم
+• password: كلمة المرور
+• auto_submit: إرسال تلقائي (true/false)
+• form_id: معرف النموذج
+• username_field: اسم حقل المستخدم
+• password_field: اسم حقل كلمة المرور
+• submit_button: اسم زر الإرسال
+
+🔍 استكشاف الأخطاء:
+• استخدم "فحص الحقول" لرؤية جميع الحقول
+• استخدم "فحص النماذج" لرؤية النماذج
+• استخدم "حالة النظام" لرؤية المعلومات الحالية
+
+📞 الدعم:
+• تحقق من وحدة التحكم (F12) للرسائل التفصيلية
+• تأكد من وجود حقول اسم المستخدم وكلمة المرور
+• جرب المعاملات المختلفة في URL
+
+الإصدار: 2.0
+المطور: Host Vault`;
+
+        alert(help);
+    }
+
+    // إضافة قائمة السياق عند النقر بالزر الأيمن
+    let contextMenu = null;
+    
+    document.addEventListener('contextmenu', (e) => {
+        // إنشاء القائمة فقط عند الحاجة
+        if (!contextMenu) {
+            contextMenu = createContextMenu();
+        }
+        
+        // تحديد موقع القائمة
+        const menuPanel = contextMenu.querySelector('div');
+        const x = e.clientX;
+        const y = e.clientY;
+        
+        // التأكد من أن القائمة تظهر داخل الشاشة
+        const rect = menuPanel.getBoundingClientRect();
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+        
+        let finalX = x;
+        let finalY = y;
+        
+        if (x + rect.width > windowWidth) {
+            finalX = windowWidth - rect.width - 10;
+        }
+        if (y + rect.height > windowHeight) {
+            finalY = windowHeight - rect.height - 10;
+        }
+        
+        menuPanel.style.left = finalX + 'px';
+        menuPanel.style.top = finalY + 'px';
+        
+        contextMenu.style.display = 'block';
+        e.preventDefault();
+    });
+
+    // إغلاق القائمة عند النقر في أي مكان آخر
+    document.addEventListener('click', (e) => {
+        if (contextMenu && contextMenu.style.display === 'block') {
+            contextMenu.style.display = 'none';
+        }
+    });
+
+    // إغلاق القائمة عند الضغط على Escape
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && contextMenu && contextMenu.style.display === 'block') {
+            contextMenu.style.display = 'none';
+        }
+    });
+
     console.log('✨ Auto Login Helper جاهز!');
+    console.log('🖱️  انقر بالزر الأيمن لعرض قائمة السياق');
 
 })();
