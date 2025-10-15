@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار تسجيل الدخول التلقائي</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            margin: 0;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .form-container {
+            text-align: right;
+            margin-top: 20px;
+        }
+        
+        .input-req-login {
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .input-field-login {
+            margin-bottom: 15px;
+            position: relative;
+        }
+        
+        .input-field-login input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .input-field-login input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .controls {
+            margin-top: 20px;
+        }
+        
+        .login-btn button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .login-btn button:hover {
+            transform: translateY(-2px);
+        }
+        
+        .test-info {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: right;
+        }
+        
+        .test-info h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        
+        .test-info p {
+            margin: 10px 0;
+            color: #666;
+        }
+        
+        .test-links {
+            margin-top: 20px;
+        }
+        
+        .test-links a {
+            display: inline-block;
+            margin: 10px;
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        
+        .test-links a:hover {
+            background: #5a6fd8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>اختبار تسجيل الدخول التلقائي</h1>
+        <p>هذه صفحة اختبار لمحاكاة نموذج تسجيل الدخول</p>
+        
+        <div class="form-container">
+            <form novalidate="" id="login_form" action="/login/" method="post" style="visibility: visible;">
+                <div class="input-req-login"><label for="user">Username</label></div>
+                <div class="input-field-login icon username-container">
+                    <input name="user" id="user" autofocus="autofocus" value="" placeholder="Enter your username." class="std_textbox" type="text" tabindex="1" data-testid="user" required="">
+                </div>
+                <div class="input-req-login login-password-field-label"><label for="pass">Password</label></div>
+                <div class="input-field-login icon password-container">
+                    <input name="pass" id="pass" placeholder="Enter your account password." class="std_textbox" type="password" tabindex="2" data-testid="pass" required="">
+                </div>
+                <div class="controls">
+                    <div class="login-btn">
+                        <button name="login" type="submit" id="login_submit" tabindex="3" data-testid="login_submit">Log in</button>
+                    </div>
+                </div>
+                <div class="clear" id="push"></div>
+            </form>
+        </div>
+        
+        <div class="test-info">
+            <h3>كيفية الاختبار:</h3>
+            <p>1. انسخ الرابط التالي مع البيانات:</p>
+            <p><code>?username=testuser&password=testpass&auto_submit=true</code></p>
+            <p>2. أو استخدم الأزرار أدناه للاختبار</p>
+            
+            <div class="test-links">
+                <a href="?username=admin&password=123456&auto_submit=false">اختبار التعبئة فقط</a>
+                <a href="?username=admin&password=123456&auto_submit=true">اختبار التعبئة والإرسال</a>
+                <a href="?username=testuser&password=testpass&auto_submit=true&form_id=login_form&username_field=user&password_field=pass&submit_button=login_submit">اختبار شامل</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // معالجة إرسال النموذج
+        document.getElementById('login_form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('user').value;
+            const password = document.getElementById('pass').value;
+            
+            alert(`تم إرسال النموذج!\nاسم المستخدم: ${username}\nكلمة المرور: ${password}`);
+        });
+        
+        // عرض البيانات في الكونسول
+        console.log('🔐 صفحة اختبار تسجيل الدخول التلقائي');
+        console.log('📋 الحقول المتاحة:');
+        console.log('  - حقل اسم المستخدم: input[name="user"]');
+        console.log('  - حقل كلمة المرور: input[name="pass"]');
+        console.log('  - زر الإرسال: button[id="login_submit"]');
+    </script>
+</body>
+</html>

@@ -22,7 +22,8 @@ import {
   Terminal,
   Globe,
   Key,
-  Link2
+  Link2,
+  ClipboardCopy
 } from 'lucide-react';
 import { Hosting, HostingType } from '@/types/hosting';
 import { toast } from 'sonner';
@@ -68,17 +69,59 @@ export function HostingCard({ hosting, onEdit, onDelete, onToggleFavorite }: Hos
     }
   };
 
+  const copyAllInfo = async () => {
+    const info = `الاسم: ${hosting.name}
+النوع: ${hosting.type}
+الرابط: ${hosting.url}
+اسم المستخدم: ${hosting.username}
+كلمة المرور: ${hosting.password}${hosting.notes ? '\nملاحظات: ' + hosting.notes : ''}${hosting.tags.length > 0 ? '\nالوسوم: ' + hosting.tags.join(', ') : ''}`;
+    
+    try {
+      await navigator.clipboard.writeText(info);
+      toast.success('تم نسخ جميع المعلومات إلى الحافظة');
+    } catch {
+      toast.error('فشل النسخ');
+    }
+  };
+
   const openUrl = () => {
-    window.open(hosting.url, '_blank');
-    toast.success('تم فتح الرابط في نافذة جديدة');
+    // فتح الرابط عبر صفحة الوسيطة مع البيانات
+    const proxyUrl = new URL('/auto-login.html', window.location.origin);
+    proxyUrl.searchParams.set('url', hosting.url);
+    proxyUrl.searchParams.set('username', hosting.username);
+    proxyUrl.searchParams.set('password', hosting.password);
+    proxyUrl.searchParams.set('auto_submit', 'false');
+    
+    // إضافة معاملات إضافية للدعم الشامل
+    proxyUrl.searchParams.set('form_id', 'login_form');
+    proxyUrl.searchParams.set('username_field', 'user');
+    proxyUrl.searchParams.set('password_field', 'pass');
+    proxyUrl.searchParams.set('submit_button', 'login_submit');
+    
+    window.open(proxyUrl.toString(), '_blank');
+    toast.success('تم فتح الرابط - سيتم ملء الحقول تلقائياً');
   };
 
   const openWithCredentials = () => {
-    // فتح الرابط ونسخ البيانات للحافظة
-    copyToClipboard(hosting.username, 'اسم المستخدم');
+    // فتح الرابط عبر صفحة الوسيطة مع التعبئة والإرسال التلقائي
+    const proxyUrl = new URL('/auto-login.html', window.location.origin);
+    proxyUrl.searchParams.set('url', hosting.url);
+    proxyUrl.searchParams.set('username', hosting.username);
+    proxyUrl.searchParams.set('password', hosting.password);
+    proxyUrl.searchParams.set('auto_submit', 'true');
+    
+    // إضافة معاملات إضافية للدعم الشامل
+    proxyUrl.searchParams.set('form_id', 'login_form');
+    proxyUrl.searchParams.set('username_field', 'user');
+    proxyUrl.searchParams.set('password_field', 'pass');
+    proxyUrl.searchParams.set('submit_button', 'login_submit');
+    
+    // نسخ اسم المستخدم كنسخة احتياطية
+    copyToClipboard(hosting.username, 'اسم المستخدم (نسخة احتياطية)');
+    
     setTimeout(() => {
-      window.open(hosting.url, '_blank');
-      toast.info('تم نسخ اسم المستخدم. انسخ كلمة المرور من البطاقة');
+      window.open(proxyUrl.toString(), '_blank');
+      toast.info('سيتم فتح الموقع وتعبئة البيانات وإرسال النموذج تلقائياً');
     }, 100);
   };
 
@@ -203,22 +246,32 @@ export function HostingCard({ hosting, onEdit, onDelete, onToggleFavorite }: Hos
         </div>
       )}
 
-      <div className="flex gap-2">
+      <div className="space-y-2">
+        <div className="flex gap-2">
+          <Button
+            variant="default"
+            className="flex-1"
+            onClick={openWithCredentials}
+          >
+            <ExternalLink className="w-4 h-4 ml-2" />
+            فتح مع البيانات
+          </Button>
+          <Button
+            variant="outline"
+            className="flex-1"
+            onClick={openUrl}
+          >
+            <ExternalLink className="w-4 h-4 ml-2" />
+            فتح الرابط
+          </Button>
+        </div>
         <Button
-          variant="default"
-          className="flex-1"
-          onClick={openWithCredentials}
+          variant="secondary"
+          className="w-full"
+          onClick={copyAllInfo}
         >
-          <ExternalLink className="w-4 h-4 ml-2" />
-          فتح مع البيانات
-        </Button>
-        <Button
-          variant="outline"
-          className="flex-1"
-          onClick={openUrl}
-        >
-          <ExternalLink className="w-4 h-4 ml-2" />
-          فتح الرابط
+          <ClipboardCopy className="w-4 h-4 ml-2" />
+          نسخ جميع المعلومات
         </Button>
       </div>
 
@@ -238,6 +291,10 @@ export function HostingCard({ hosting, onEdit, onDelete, onToggleFavorite }: Hos
           فتح الرابط فقط
         </ContextMenuItem>
         <ContextMenuSeparator />
+        <ContextMenuItem onClick={copyAllInfo}>
+          <ClipboardCopy className="w-4 h-4 ml-2" />
+          نسخ جميع المعلومات
+        </ContextMenuItem>
         <ContextMenuItem onClick={() => copyToClipboard(hosting.url, 'الرابط')}>
           <Copy className="w-4 h-4 ml-2" />
           نسخ الرابط

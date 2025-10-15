@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>جاري تسجيل الدخول...</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulse 2s infinite;
+        }
+        
+        .icon svg {
+            width: 40px;
+            height: 40px;
+            stroke: white;
+            stroke-width: 2;
+            fill: none;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+        
+        .status {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            animation: progress 3s ease-in-out infinite;
+        }
+        
+        @keyframes progress {
+            0% { width: 0%; }
+            50% { width: 70%; }
+            100% { width: 100%; }
+        }
+        
+        .info {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: right;
+        }
+        
+        .info-item {
+            margin-bottom: 10px;
+            color: #555;
+            font-size: 14px;
+        }
+        
+        .info-item strong {
+            color: #333;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .error {
+            color: #e74c3c;
+            background: #fee;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        
+        .console-log {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: left;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+        }
+        
+        .console-log.show {
+            display: block;
+        }
+        
+        .log-line {
+            margin: 5px 0;
+            padding: 2px 0;
+        }
+        
+        .log-success { color: #4caf50; }
+        .log-error { color: #f44336; }
+        .log-warning { color: #ff9800; }
+        .log-info { color: #2196f3; }
+    </style>
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&family=Noto+Kufi+Arabic:wght@100..900&family=Noto+Sans+Arabic:wght@100..900&family=Tajawal:wght@200;300;400;500;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+    
+* {
+  font-family: "Cairo", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  font-variation-settings:
+    "slnt" 0;
+}
+</style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">
+            <svg viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M12 6v6l4 2"></path>
+            </svg>
+        </div>
+        
+        <h1>جاري تسجيل الدخول</h1>
+        <p class="status" id="status">جاري تحضير البيانات...</p>
+        
+        <div class="progress-bar">
+            <div class="progress-fill"></div>
+        </div>
+        
+        <div class="info" id="info"></div>
+        <div class="console-log" id="console"></div>
+    </div>
+
+    <script>
+        // استخراج البيانات من URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const targetUrl = urlParams.get('url');
+        const username = urlParams.get('username');
+        const password = urlParams.get('password');
+        const autoSubmit = urlParams.get('auto_submit') === 'true';
+        
+        // إضافة معاملات إضافية للدعم الشامل
+        const formId = urlParams.get('form_id') || 'login_form';
+        const usernameField = urlParams.get('username_field') || 'user';
+        const passwordField = urlParams.get('password_field') || 'pass';
+        const submitButton = urlParams.get('submit_button') || 'login_submit';
+
+        const statusEl = document.getElementById('status');
+        const infoEl = document.getElementById('info');
+        const consoleEl = document.getElementById('console');
+
+        function log(message, type = 'info') {
+            const logLine = document.createElement('div');
+            logLine.className = `log-line log-${type}`;
+            logLine.textContent = `[${new Date().toLocaleTimeString('ar')}] ${message}`;
+            consoleEl.appendChild(logLine);
+            consoleEl.scrollTop = consoleEl.scrollHeight;
+            consoleEl.classList.add('show');
+        }
+
+        function updateStatus(message) {
+            statusEl.textContent = message;
+            log(message, 'info');
+        }
+
+        function showInfo() {
+            if (!targetUrl || !username || !password) {
+                infoEl.innerHTML = `
+                    <div class="error">
+                        <strong>⚠️ خطأ: بيانات غير مكتملة</strong>
+                        <p>الرجاء التأكد من وجود جميع البيانات المطلوبة في الرابط</p>
+                    </div>
+                `;
+                log('خطأ: بيانات غير مكتملة في URL', 'error');
+                return false;
+            }
+
+            infoEl.innerHTML = `
+                <div class="info-item"><strong>🌐 الموقع:</strong> ${targetUrl}</div>
+                <div class="info-item"><strong>👤 اسم المستخدم:</strong> ${username}</div>
+                <div class="info-item"><strong>🔐 كلمة المرور:</strong> ${'•'.repeat(password.length)}</div>
+                <div class="info-item"><strong>📤 الإرسال التلقائي:</strong> ${autoSubmit ? 'نعم ✓' : 'لا'}</div>
+            `;
+            return true;
+        }
+
+        function createAutoFillScript() {
+            return `
+                (function() {
+                    const username = "${username.replace(/"/g, '\\"')}";
+                    const password = "${password.replace(/"/g, '\\"')}";
+                    const autoSubmit = ${autoSubmit};
+                    const formId = "${formId}";
+                    const usernameField = "${usernameField}";
+                    const passwordField = "${passwordField}";
+                    const submitButton = "${submitButton}";
+
+                    console.log('🔐 Auto Login Helper v3.0: بدء التعبئة التلقائية');
+
+                    // ===== مصفوفة شاملة لجميع أنواع حقول اسم المستخدم =====
+                    const USERNAME_PATTERNS = {
+                        // أسماء الحقول (name attribute)
+                        names: [
+                            'user', 'username', 'userName', 'user_name', 'user-name',
+                            'login', 'loginname', 'login_name', 'login-name',
+                            'email', 'e-mail', 'mail', 'emailaddress', 'email_address',
+                            'account', 'accountname', 'account_name',
+                            'userid', 'user_id', 'id',
+                            'loginid', 'login_id',
+                            'handle', 'alias',
+                            // cPanel specific
+                            'user', 'cpanel_user',
+                            // Plesk specific
+                            'login_name', 'loginName',
+                            // DirectAdmin specific
+                            'username', 'referer',
+                            // WordPress specific
+                            'log', 'user_login',
+                            // Common variations
+                            'identification', 'credential',
+                            // Custom field names from URL
+                            usernameField
+                        ],
+                        
+                        // معرفات الحقول (id attribute)
+                        ids: [
+                            'user', 'username', 'userName', 'user_name', 'user-name',
+                            'login', 'loginname', 'login_name', 'login-name',
+                            'email', 'e-mail', 'mail', 'emailaddress',
+                            'account', 'accountname',
+                            'userid', 'user_id', 'id',
+                            'input-user', 'input-username', 'input-login',
+                            'txt-user', 'txt-username', 'txt-login',
+                            'field-user', 'field-username',
+                            // cPanel
+                            'user', 'login_user',
+                            // WordPress
+                            'user_login', 'log',
+                            // Generic
+                            'signin-username', 'signin-email',
+                            // Custom field names from URL
+                            usernameField
+                        ],
+                        
+                        // أنواع الحقول (type attribute)
+                        types: ['text', 'email', 'tel'],
+                        
+                        // نصوص placeholder
+                        placeholders: [
+                            'username', 'user name', 'enter username', 'your username',
+                            'email', 'e-mail', 'enter email', 'your email',
+                            'login', 'enter login', 'account',
+                            'usuario', 'utilisateur', // Spanish, French
+                            'اسم المستخدم', 'البريد الإلكتروني' // Arabic
+                        ],
+                        
+                        // نصوص autocomplete
+                        autocomplete: ['username', 'email', 'login']
+                    };
+
+                    // ===== مصفوفة شاملة لجميع أنواع حقول كلمة المرور =====
+                    const PASSWORD_PATTERNS = {
+                        // أسماء الحقول
+                        names: [
+                            'pass', 'password', 'passwd', 'pwd',
+                            'pass_word', 'pass-word', 'password1',
+                            'user_pass', 'user-pass', 'userpass', 'userpassword',
+                            'login_pass', 'login-pass', 'loginpass', 'loginpassword',
+                            'account_pass', 'account-pass',
+                            'secret', 'pin', 'code',
+                            // cPanel
+                            'pass', 'cpanel_pass',
+                            // Plesk
+                            'passwd', 'password',
+                            // WordPress
+                            'pwd', 'user_pass',
+                            // Common
+                            'credential_password', 'auth_password',
+                            // Custom field names from URL
+                            passwordField
+                        ],
+                        
+                        // معرفات الحقول
+                        ids: [
+                            'pass', 'password', 'passwd', 'pwd',
+                            'pass_word', 'pass-word', 'password1',
+                            'user_pass', 'user-pass', 'userpass',
+                            'login_pass', 'login-pass', 'loginpass',
+                            'input-pass', 'input-password', 'input-passwd',
+                            'txt-pass', 'txt-password',
+                            'field-pass', 'field-password',
+                            // WordPress
+                            'user_pass', 'pwd',
+                            // Generic
+                            'signin-password', 'login-password',
+                            // Custom field names from URL
+                            passwordField
+                        ],
+                        
+                        // أنواع الحقول
+                        types: ['password'],
+                        
+                        // نصوص placeholder
+                        placeholders: [
+                            'password', 'pass word', 'enter password', 'your password',
+                            'passwd', 'pwd', 'secret', 'pin',
+                            'contraseña', 'mot de passe', // Spanish, French
+                            'كلمة المرور', 'كلمة السر' // Arabic
+                        ],
+                        
+                        // نصوص autocomplete
+                        autocomplete: ['current-password', 'password']
+                    };
+
+                    // ===== مصفوفة شاملة لأزرار الإرسال =====
+                    const SUBMIT_PATTERNS = {
+                        // By type
+                        types: ['submit', 'button'],
+                        
+                        // By name
+                        names: [
+                            'login', 'signin', 'submit', 'send', 'enter',
+                            'log_in', 'sign_in', 'log-in', 'sign-in',
+                            'btn_login', 'btn_signin', 'btn_submit',
+                            // Custom button names from URL
+                            submitButton
+                        ],
+                        
+                        // By id
+                        ids: [
+                            'login', 'signin', 'submit', 'send', 'enter',
+                            'login_submit', 'submit_btn', 'btn_login',
+                            'loginButton', 'signinButton', 'submitButton',
+                            'wp-submit', // WordPress
+                            // Custom button names from URL
+                            submitButton
+                        ],
+                        
+                        // By class
+                        classes: [
+                            'login-btn', 'submit-btn', 'btn-login', 'btn-submit',
+                            'btn-primary', 'btn-success', 'btn-submit',
+                            'login-button', 'submit-button'
+                        ],
+                        
+                        // Generic selectors
+                        generic: [
+                            'button[type="submit"]',
+                            'input[type="submit"]',
+                            'form button:not([type="button"]):not([type="reset"])',
+                            '.login-btn button',
+                            '.submit-btn button'
+                        ]
+                    };
+
+                    function findElement(selectors) {
+                        for (let selector of selectors) {
+                            try {
+                                const el = document.querySelector(selector);
+                                if (el) {
+                                    console.log('✓ تم العثور على:', selector);
+                                    return el;
+                                }
+                            } catch(e) {}
+                        }
+                        return null;
+                    }
+
+                    function fillInput(input, value) {
+                        if (!input) return false;
+                        
+                        input.focus();
+                        input.value = value;
+                        
+                        // Trigger events
+                        ['focus', 'input', 'change', 'blur'].forEach(eventType => {
+                            const event = new Event(eventType, { bubbles: true });
+                            input.dispatchEvent(event);
+                        });
+                        
+                        console.log('✓ تم ملء الحقل:', input.name || input.id);
+                        return true;
+                    }
+
+                    function attemptAutoFill() {
+                        const usernameField = findElement(USERNAME_SELECTORS);
+                        const passwordField = findElement(PASSWORD_SELECTORS);
+
+                        if (!usernameField || !passwordField) {
+                            console.log('⚠ لم يتم العثور على الحقول، محاولة أخرى...');
+                            return false;
+                        }
+
+                        fillInput(usernameField, username);
+                        fillInput(passwordField, password);
+
+                        if (autoSubmit) {
+                            setTimeout(() => {
+                                const submitBtn = findElement(SUBMIT_SELECTORS);
+                                if (submitBtn) {
+                                    console.log('📤 إرسال النموذج...');
+                                    submitBtn.click();
+                                } else {
+                                    console.log('⏎ محاولة الضغط على Enter...');
+                                    const enterEvent = new KeyboardEvent('keypress', {
+                                        key: 'Enter',
+                                        code: 'Enter',
+                                        keyCode: 13,
+                                        which: 13,
+                                        bubbles: true
+                                    });
+                                    passwordField.dispatchEvent(enterEvent);
+                                }
+                            }, 500);
+                        }
+
+                        console.log('✅ تمت التعبئة بنجاح!');
+                        return true;
+                    }
+
+                    // محاولات متعددة
+                    let attempts = 0;
+                    const maxAttempts = 5;
+                    
+                    function tryFill() {
+                        attempts++;
+                        console.log(\`محاولة \${attempts}/\${maxAttempts}\`);
+                        
+                        if (attemptAutoFill()) {
+                            return;
+                        }
+                        
+                        if (attempts < maxAttempts) {
+                            setTimeout(tryFill, 500);
+                        } else {
+                            console.log('⚠ فشلت جميع المحاولات');
+                        }
+                    }
+
+                    // بدء التعبئة
+                    if (document.readyState === 'loading') {
+                        document.addEventListener('DOMContentLoaded', tryFill);
+                    } else {
+                        setTimeout(tryFill, 100);
+                    }
+
+                    // محاولة إضافية بعد التحميل الكامل
+                    window.addEventListener('load', () => {
+                        setTimeout(() => {
+                            const passField = document.querySelector('input[type="password"]');
+                            if (passField && !passField.value) {
+                                console.log('محاولة إضافية...');
+                                attemptAutoFill();
+                            }
+                        }, 500);
+                    });
+                })();
+            `;
+        }
+
+        async function openAndFill() {
+            if (!showInfo()) {
+                return;
+            }
+
+            updateStatus('جاري فتح الموقع...');
+            log('فتح الموقع: ' + targetUrl, 'info');
+
+            // فتح النافذة الجديدة
+            const newWindow = window.open(targetUrl, '_blank');
+
+            if (!newWindow) {
+                statusEl.innerHTML = `
+                    <div class="error">
+                        <strong>⚠️ خطأ: تم حظر النافذة المنبثقة</strong>
+                        <p>الرجاء السماح للنوافذ المنبثقة في متصفحك</p>
+                        <a href="${targetUrl}" target="_blank" class="btn">فتح الموقع يدوياً</a>
+                    </div>
+                `;
+                log('خطأ: تم حظر النافذة المنبثقة', 'error');
+                return;
+            }
+
+            updateStatus('تم فتح الموقع! جاري حقن الكود...');
+            log('تم فتح النافذة الجديدة', 'success');
+
+            // محاولة حقن الكود مع استراتيجيات متعددة
+            let injectionAttempted = false;
+            
+            function attemptInjection() {
+                if (injectionAttempted) return;
+                injectionAttempted = true;
+                
+                try {
+                    // الطريقة الأولى: حقن مباشر
+                    if (newWindow.document && newWindow.document.head) {
+                        const script = newWindow.document.createElement('script');
+                        script.textContent = createAutoFillScript();
+                        newWindow.document.head.appendChild(script);
+                        log('✅ تم حقن الكود بنجاح!', 'success');
+                        updateStatus('✅ تم حقن الكود! سيتم ملء الحقول تلقائياً');
+                        
+                        setTimeout(() => {
+                            window.close();
+                        }, 3000);
+                        return true;
+                    }
+                } catch(e) {
+                    log('فشل الحقن المباشر: ' + e.message, 'warning');
+                }
+                
+                // الطريقة الثانية: استخدام postMessage
+                try {
+                    const autoFillData = {
+                        type: 'AUTO_FILL_DATA',
+                        username: username,
+                        password: password,
+                        autoSubmit: autoSubmit,
+                        formId: formId,
+                        usernameField: usernameField,
+                        passwordField: passwordField,
+                        submitButton: submitButton
+                    };
+                    
+                    newWindow.postMessage(autoFillData, '*');
+                    log('📤 تم إرسال البيانات عبر postMessage', 'info');
+                    
+                    // إضافة مستمع للاستجابة
+                    window.addEventListener('message', function(event) {
+                        if (event.data.type === 'AUTO_FILL_SUCCESS') {
+                            log('✅ تم استلام تأكيد التعبئة الناجحة', 'success');
+                            updateStatus('✅ تم ملء الحقول بنجاح!');
+                            setTimeout(() => window.close(), 2000);
+                        } else if (event.data.type === 'AUTO_FILL_ERROR') {
+                            log('❌ خطأ في التعبئة: ' + event.data.error, 'error');
+                        }
+                    });
+                    
+                    updateStatus('📤 تم إرسال البيانات - انتظر التعبئة...');
+                    setTimeout(() => {
+                        if (!injectionAttempted) {
+                            showFallbackInfo();
+                        }
+                    }, 5000);
+                    
+                } catch(e) {
+                    log('فشل postMessage: ' + e.message, 'warning');
+                    showFallbackInfo();
+                }
+            }
+            
+            function showFallbackInfo() {
+                statusEl.innerHTML = `
+                    <div class="error">
+                        <strong>⚠️ لم يتم حقن الكود تلقائياً</strong>
+                        <p>يرجى تثبيت Tampermonkey واستخدام السكريبت المرفق</p>
+                        <p><strong>البيانات المطلوبة:</strong></p>
+                        <div style="background: #f0f0f0; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                            <p><strong>اسم المستخدم:</strong> <code>${username}</code> 
+                               <button onclick="navigator.clipboard.writeText('${username}')" style="margin-right: 10px; padding: 5px 10px; cursor: pointer; background: #667eea; color: white; border: none; border-radius: 4px;">نسخ</button>
+                            </p>
+                            <p><strong>كلمة المرور:</strong> <code>${'•'.repeat(password.length)}</code> 
+                               <button onclick="navigator.clipboard.writeText('${password}')" style="margin-right: 10px; padding: 5px 10px; cursor: pointer; background: #667eea; color: white; border: none; border-radius: 4px;">نسخ</button>
+                               <button onclick="alert('${password}')" style="margin-right: 10px; padding: 5px 10px; cursor: pointer; background: #28a745; color: white; border: none; border-radius: 4px;">عرض</button>
+                            </p>
+                        </div>
+                        <p><strong>أو استخدم الرابط المباشر:</strong></p>
+                        <p><code>${targetUrl}?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&auto_submit=${autoSubmit}</code></p>
+                    </div>
+                `;
+            }
+            
+            // محاولة الحقن عند تحميل الصفحة
+            if (newWindow.document.readyState === 'loading') {
+                newWindow.addEventListener('load', attemptInjection);
+            } else {
+                attemptInjection();
+            }
+            
+            // محاولة إضافية بعد تأخير قصير
+            setTimeout(attemptInjection, 1000);
+        }
+
+        // تشغيل عند تحميل الصفحة
+        window.addEventListener('load', () => {
+            setTimeout(openAndFill, 1000);
+        });
+    </script>
+</body>
+</html>
+

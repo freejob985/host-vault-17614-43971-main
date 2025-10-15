@@ -153,7 +153,7 @@ const Index = () => {
   }, [filteredHostings, currentPage]);
 
   // Reset to page 1 when filters change
-  useMemo(() => {
+  useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery, filterType, showFavoritesOnly]);
 
@@ -302,7 +302,7 @@ const Index = () => {
                 className="pr-10"
               />
             </div>
-            <Select value={filterType} onValueChange={(v) => setFilterType(v as any)}>
+            <Select value={filterType} onValueChange={(v) => setFilterType(v as HostingType | 'all')}>
               <SelectTrigger className="w-full sm:w-[180px]">
                 <Filter className="w-4 h-4 ml-2" />
                 <SelectValue />
