@@ -86,21 +86,9 @@ export function HostingCard({ hosting, onEdit, onDelete, onToggleFavorite }: Hos
   };
 
   const openUrl = () => {
-    // فتح الرابط عبر صفحة الحلول المتقدمة
-    const proxyUrl = new URL('/auto-login-advanced.html', window.location.origin);
-    proxyUrl.searchParams.set('url', hosting.url);
-    proxyUrl.searchParams.set('username', hosting.username);
-    proxyUrl.searchParams.set('password', hosting.password);
-    proxyUrl.searchParams.set('auto_submit', 'false');
-    
-    // إضافة معاملات إضافية للدعم الشامل
-    proxyUrl.searchParams.set('form_id', 'login_form');
-    proxyUrl.searchParams.set('username_field', 'user');
-    proxyUrl.searchParams.set('password_field', 'pass');
-    proxyUrl.searchParams.set('submit_button', 'login_submit');
-    
-    window.open(proxyUrl.toString(), '_blank');
-    toast.success('تم فتح صفحة الحلول المتقدمة');
+    // فتح الرابط مباشرة
+    window.open(hosting.url, '_blank');
+    toast.success('تم فتح الرابط مباشرة');
   };
 
   const openWithCredentials = () => {
@@ -132,15 +120,9 @@ export function HostingCard({ hosting, onEdit, onDelete, onToggleFavorite }: Hos
       return;
     }
     
-    // فتح رابط لوحة الإدارة عبر صفحة تجاوز الأمان
-    const proxyUrl = new URL('/auto-login-bypass.html', window.location.origin);
-    proxyUrl.searchParams.set('url', hosting.adminPanelUrl);
-    proxyUrl.searchParams.set('username', hosting.username);
-    proxyUrl.searchParams.set('password', hosting.password);
-    proxyUrl.searchParams.set('auto_submit', 'false');
-    
-    window.open(proxyUrl.toString(), '_blank');
-    toast.success('تم فتح لوحة الإدارة');
+    // فتح رابط لوحة الإدارة مباشرة
+    window.open(hosting.adminPanelUrl, '_blank');
+    toast.success('تم فتح لوحة الإدارة مباشرة');
   };
 
   const openAdminPanelWithCredentials = () => {
@@ -182,10 +164,20 @@ export function HostingCard({ hosting, onEdit, onDelete, onToggleFavorite }: Hos
     toast.success('يمكنك الآن لصق الرابط في المتصفح للفتح التلقائي');
   };
 
+  const handleCardClick = () => {
+    // فتح الرابط مباشرة عند الضغط على الكارد
+    window.open(hosting.url, '_blank');
+    toast.success('تم فتح الرابط مباشرة');
+  };
+
   return (
     <ContextMenu>
       <ContextMenuTrigger asChild>
-        <Card className="p-5 hover:shadow-hover transition-all duration-300 group">
+        <Card 
+          className="p-5 hover:shadow-hover hover:scale-[1.02] transition-all duration-300 group cursor-pointer border-2 hover:border-primary/20" 
+          onClick={handleCardClick}
+          title="اضغط لفتح الرابط مباشرة"
+        >
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3 flex-1">
           <div className={cn('p-3 rounded-xl', hostingColors[hosting.type])}>
@@ -194,19 +186,25 @@ export function HostingCard({ hosting, onEdit, onDelete, onToggleFavorite }: Hos
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <h3 className="font-bold text-lg truncate">{hosting.name}</h3>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="w-7 h-7 opacity-0 group-hover:opacity-100 transition-opacity"
-                onClick={() => onToggleFavorite(hosting.id)}
-              >
-                <Star 
-                  className={cn(
-                    "w-4 h-4",
-                    hosting.favorite && "fill-yellow-400 text-yellow-400"
-                  )} 
-                />
-              </Button>
+              <div className="flex items-center gap-1">
+                <ExternalLink className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="w-7 h-7 opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onToggleFavorite(hosting.id);
+                  }}
+                >
+                  <Star 
+                    className={cn(
+                      "w-4 h-4",
+                      hosting.favorite && "fill-yellow-400 text-yellow-400"
+                    )} 
+                  />
+                </Button>
+              </div>
             </div>
             <p className="text-sm text-muted-foreground truncate">{hosting.url}</p>
           </div>
@@ -216,7 +214,10 @@ export function HostingCard({ hosting, onEdit, onDelete, onToggleFavorite }: Hos
             variant="ghost"
             size="icon"
             className="w-8 h-8"
-            onClick={() => onEdit(hosting)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit(hosting);
+            }}
           >
             <Pencil className="w-4 h-4" />
           </Button>
@@ -224,7 +225,10 @@ export function HostingCard({ hosting, onEdit, onDelete, onToggleFavorite }: Hos
             variant="ghost"
             size="icon"
             className="w-8 h-8 text-destructive hover:text-destructive"
-            onClick={() => onDelete(hosting.id)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete(hosting.id);
+            }}
           >
             <Trash2 className="w-4 h-4" />
           </Button>
@@ -241,7 +245,10 @@ export function HostingCard({ hosting, onEdit, onDelete, onToggleFavorite }: Hos
             variant="ghost"
             size="icon"
             className="w-8 h-8 shrink-0"
-            onClick={() => copyToClipboard(hosting.username, 'اسم المستخدم')}
+            onClick={(e) => {
+              e.stopPropagation();
+              copyToClipboard(hosting.username, 'اسم المستخدم');
+            }}
           >
             <Copy className="w-4 h-4" />
           </Button>
@@ -256,7 +263,10 @@ export function HostingCard({ hosting, onEdit, onDelete, onToggleFavorite }: Hos
             variant="ghost"
             size="icon"
             className="w-8 h-8 shrink-0"
-            onClick={() => setShowPassword(!showPassword)}
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowPassword(!showPassword);
+            }}
           >
             {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
           </Button>
@@ -264,7 +274,10 @@ export function HostingCard({ hosting, onEdit, onDelete, onToggleFavorite }: Hos
             variant="ghost"
             size="icon"
             className="w-8 h-8 shrink-0"
-            onClick={() => copyToClipboard(hosting.password, 'كلمة المرور')}
+            onClick={(e) => {
+              e.stopPropagation();
+              copyToClipboard(hosting.password, 'كلمة المرور');
+            }}
           >
             <Copy className="w-4 h-4" />
           </Button>
@@ -292,7 +305,10 @@ export function HostingCard({ hosting, onEdit, onDelete, onToggleFavorite }: Hos
           <Button
             variant="default"
             className="flex-1"
-            onClick={openWithCredentials}
+            onClick={(e) => {
+              e.stopPropagation();
+              openWithCredentials();
+            }}
           >
             <ExternalLink className="w-4 h-4 ml-2" />
             فتح مع البيانات
@@ -300,10 +316,13 @@ export function HostingCard({ hosting, onEdit, onDelete, onToggleFavorite }: Hos
           <Button
             variant="outline"
             className="flex-1"
-            onClick={openUrl}
+            onClick={(e) => {
+              e.stopPropagation();
+              openUrl();
+            }}
           >
             <ExternalLink className="w-4 h-4 ml-2" />
-            فتح الرابط
+            فتح مباشر
           </Button>
         </div>
         
@@ -312,7 +331,10 @@ export function HostingCard({ hosting, onEdit, onDelete, onToggleFavorite }: Hos
             <Button
               variant="secondary"
               className="flex-1"
-              onClick={openAdminPanelWithCredentials}
+              onClick={(e) => {
+                e.stopPropagation();
+                openAdminPanelWithCredentials();
+              }}
             >
               <Settings className="w-4 h-4 ml-2" />
               لوحة الإدارة + بيانات
@@ -320,10 +342,13 @@ export function HostingCard({ hosting, onEdit, onDelete, onToggleFavorite }: Hos
             <Button
               variant="outline"
               className="flex-1"
-              onClick={openAdminPanel}
+              onClick={(e) => {
+                e.stopPropagation();
+                openAdminPanel();
+              }}
             >
               <Settings className="w-4 h-4 ml-2" />
-              لوحة الإدارة
+              لوحة الإدارة مباشر
             </Button>
           </div>
         )}
@@ -331,7 +356,10 @@ export function HostingCard({ hosting, onEdit, onDelete, onToggleFavorite }: Hos
         <Button
           variant="secondary"
           className="w-full"
-          onClick={copyAllInfo}
+          onClick={(e) => {
+            e.stopPropagation();
+            copyAllInfo();
+          }}
         >
           <ClipboardCopy className="w-4 h-4 ml-2" />
           نسخ جميع المعلومات
@@ -351,7 +379,7 @@ export function HostingCard({ hosting, onEdit, onDelete, onToggleFavorite }: Hos
         </ContextMenuItem>
         <ContextMenuItem onClick={openUrl}>
           <ExternalLink className="w-4 h-4 ml-2" />
-          فتح الرابط فقط
+          فتح مباشر
         </ContextMenuItem>
         
         {hosting.adminPanelUrl && (
@@ -363,7 +391,7 @@ export function HostingCard({ hosting, onEdit, onDelete, onToggleFavorite }: Hos
             </ContextMenuItem>
             <ContextMenuItem onClick={openAdminPanel}>
               <Settings className="w-4 h-4 ml-2" />
-              فتح لوحة الإدارة فقط
+              لوحة الإدارة مباشر
             </ContextMenuItem>
           </>
         )}

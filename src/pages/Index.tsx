@@ -12,7 +12,8 @@ import {
   Star,
   Server,
   ChevronUp,
-  ChevronDown
+  ChevronDown,
+  RefreshCw
 } from 'lucide-react';
 import {
   Pagination,
@@ -260,6 +261,24 @@ const Index = () => {
     localStorage.setItem('headerCollapsed', JSON.stringify(newState));
   };
 
+  const handleClearCache = () => {
+    try {
+      // مسح localStorage
+      localStorage.clear();
+      
+      // مسح sessionStorage
+      sessionStorage.clear();
+      
+      // إعادة تحميل الصفحة
+      window.location.reload();
+      
+      toast.success('تم مسح الكاش بنجاح');
+    } catch (error) {
+      toast.error('فشل في مسح الكاش');
+      console.error('Error clearing cache:', error);
+    }
+  };
+
   const stats = {
     total: hostings.length,
     favorites: hostings.filter(h => h.favorite).length,
@@ -297,6 +316,14 @@ const Index = () => {
               >
                 {isHeaderCollapsed ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
               </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handleClearCache}
+                title="مسح الكاش"
+              >
+                <RefreshCw className="w-4 h-4" />
+              </Button>
               <ThemeToggle />
               <Button
                 variant="outline"
@@ -317,32 +344,34 @@ const Index = () => {
             </div>
           </div>
 
-          {/* Stats */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-            <div className="bg-primary/10 rounded-lg p-3 text-center">
-              <p className="text-2xl font-bold text-primary">{stats.total}</p>
-              <p className="text-xs text-muted-foreground">إجمالي الاستضافات</p>
-            </div>
-            <div className="bg-yellow-500/10 rounded-lg p-3 text-center">
-              <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
-                {stats.favorites}
-              </p>
-              <p className="text-xs text-muted-foreground">المفضلة</p>
-            </div>
-            <div className="bg-accent/10 rounded-lg p-3 text-center">
-              <p className="text-2xl font-bold text-accent">{stats.cpanel}</p>
-              <p className="text-xs text-muted-foreground">cPanel</p>
-            </div>
-            <div className="bg-green-500/10 rounded-lg p-3 text-center">
-              <p className="text-2xl font-bold text-green-600 dark:text-green-400">
-                {stats.tags}
-              </p>
-              <p className="text-xs text-muted-foreground">التاجات</p>
-            </div>
-          </div>
-
-          {/* Search and Filters - Collapsible */}
+          {/* Stats and Search - Collapsible */}
           {!isHeaderCollapsed && (
+            <>
+              {/* Stats */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+                <div className="bg-primary/10 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold text-primary">{stats.total}</p>
+                  <p className="text-xs text-muted-foreground">إجمالي الاستضافات</p>
+                </div>
+                <div className="bg-yellow-500/10 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
+                    {stats.favorites}
+                  </p>
+                  <p className="text-xs text-muted-foreground">المفضلة</p>
+                </div>
+                <div className="bg-accent/10 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold text-accent">{stats.cpanel}</p>
+                  <p className="text-xs text-muted-foreground">cPanel</p>
+                </div>
+                <div className="bg-green-500/10 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                    {stats.tags}
+                  </p>
+                  <p className="text-xs text-muted-foreground">التاجات</p>
+                </div>
+              </div>
+
+              {/* Search and Filters */}
             <div className="flex flex-col sm:flex-row gap-3">
               <div className="relative flex-1">
                 <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -377,6 +406,7 @@ const Index = () => {
                 <Star className={showFavoritesOnly ? 'fill-current' : ''} />
               </Button>
             </div>
+            </>
           )}
         </div>
       </header>
