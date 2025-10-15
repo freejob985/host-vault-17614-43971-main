@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول التلقائي المباشر</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulse 2s infinite;
+        }
+        
+        .icon svg {
+            width: 40px;
+            height: 40px;
+            stroke: white;
+            stroke-width: 2;
+            fill: none;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+        
+        .status {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            animation: progress 3s ease-in-out infinite;
+        }
+        
+        @keyframes progress {
+            0% { width: 0%; }
+            50% { width: 70%; }
+            100% { width: 100%; }
+        }
+        
+        .info {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: right;
+        }
+        
+        .info-item {
+            margin-bottom: 10px;
+            color: #555;
+            font-size: 14px;
+        }
+        
+        .info-item strong {
+            color: #333;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            margin: 10px;
+            font-weight: bold;
+            transition: transform 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .error {
+            color: #e74c3c;
+            background: #fee;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        
+        .success {
+            color: #27ae60;
+            background: #d5f4e6;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        
+        .console-log {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: left;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+        }
+        
+        .console-log.show {
+            display: block;
+        }
+        
+        .log-line {
+            margin: 5px 0;
+            padding: 2px 0;
+        }
+        
+        .log-success { color: #4caf50; }
+        .log-error { color: #f44336; }
+        .log-warning { color: #ff9800; }
+        .log-info { color: #2196f3; }
+        
+        .form-preview {
+            background: #f9f9f9;
+            border: 2px dashed #ccc;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: right;
+        }
+        
+        .form-preview input {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        .form-preview button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+    </style>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&family=Noto+Kufi+Arabic:wght@100..900&family=Noto+Sans+Arabic:wght@100..900&family=Tajawal:wght@200;300;400;500;700;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        
+    * {
+      font-family: "Cairo", sans-serif;
+      font-optical-sizing: auto;
+      font-weight: 400;
+      font-style: normal;
+      font-variation-settings:
+        "slnt" 0;
+    }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">
+            <svg viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M12 6v6l4 2"></path>
+            </svg>
+        </div>
+        
+        <h1>تسجيل الدخول التلقائي المباشر</h1>
+        <p class="status" id="status">جاري تحضير البيانات...</p>
+        
+        <div class="progress-bar">
+            <div class="progress-fill"></div>
+        </div>
+        
+        <div class="info" id="info"></div>
+        
+        <div class="form-preview" id="formPreview" style="display: none;">
+            <h3>معاينة النموذج:</h3>
+            <form id="previewForm">
+                <div>
+                    <label>اسم المستخدم:</label>
+                    <input type="text" id="previewUsername" readonly>
+                </div>
+                <div>
+                    <label>كلمة المرور:</label>
+                    <input type="password" id="previewPassword" readonly>
+                </div>
+                <button type="button" onclick="testAutoFill()">اختبار التعبئة</button>
+            </form>
+        </div>
+        
+        <div class="console-log" id="console"></div>
+        
+        <div id="actions" style="display: none;">
+            <button class="btn" onclick="openTargetSite()">فتح الموقع المستهدف</button>
+            <button class="btn" onclick="copyCredentials()">نسخ البيانات</button>
+            <button class="btn" onclick="showInstructions()">عرض التعليمات</button>
+        </div>
+    </div>
+
+    <script>
+        // استخراج البيانات من URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const targetUrl = urlParams.get('url');
+        const username = urlParams.get('username');
+        const password = urlParams.get('password');
+        const autoSubmit = urlParams.get('auto_submit') === 'true';
+        const formId = urlParams.get('form_id') || 'login_form';
+        const usernameField = urlParams.get('username_field') || 'user';
+        const passwordField = urlParams.get('password_field') || 'pass';
+        const submitButton = urlParams.get('submit_button') || 'login_submit';
+
+        const statusEl = document.getElementById('status');
+        const infoEl = document.getElementById('info');
+        const consoleEl = document.getElementById('console');
+        const formPreviewEl = document.getElementById('formPreview');
+        const actionsEl = document.getElementById('actions');
+
+        function log(message, type = 'info') {
+            const logLine = document.createElement('div');
+            logLine.className = `log-line log-${type}`;
+            logLine.textContent = `[${new Date().toLocaleTimeString('ar')}] ${message}`;
+            consoleEl.appendChild(logLine);
+            consoleEl.scrollTop = consoleEl.scrollHeight;
+            consoleEl.classList.add('show');
+        }
+
+        function updateStatus(message) {
+            statusEl.textContent = message;
+            log(message, 'info');
+        }
+
+        function showInfo() {
+            if (!targetUrl || !username || !password) {
+                infoEl.innerHTML = `
+                    <div class="error">
+                        <strong>⚠️ خطأ: بيانات غير مكتملة</strong>
+                        <p>الرجاء التأكد من وجود جميع البيانات المطلوبة في الرابط</p>
+                    </div>
+                `;
+                log('خطأ: بيانات غير مكتملة في URL', 'error');
+                return false;
+            }
+
+            infoEl.innerHTML = `
+                <div class="info-item"><strong>🌐 الموقع:</strong> ${targetUrl}</div>
+                <div class="info-item"><strong>👤 اسم المستخدم:</strong> ${username}</div>
+                <div class="info-item"><strong>🔐 كلمة المرور:</strong> ${'•'.repeat(password.length)}</div>
+                <div class="info-item"><strong>📤 الإرسال التلقائي:</strong> ${autoSubmit ? 'نعم ✓' : 'لا'}</div>
+                <div class="info-item"><strong>📝 معرف النموذج:</strong> ${formId}</div>
+                <div class="info-item"><strong>🏷️ حقل اسم المستخدم:</strong> ${usernameField}</div>
+                <div class="info-item"><strong>🏷️ حقل كلمة المرور:</strong> ${passwordField}</div>
+                <div class="info-item"><strong>🔘 زر الإرسال:</strong> ${submitButton}</div>
+            `;
+            
+            // إظهار معاينة النموذج
+            document.getElementById('previewUsername').value = username;
+            document.getElementById('previewPassword').value = password;
+            formPreviewEl.style.display = 'block';
+            actionsEl.style.display = 'block';
+            
+            return true;
+        }
+
+        function testAutoFill() {
+            log('🧪 بدء اختبار التعبئة التلقائية...', 'info');
+            
+            // محاولة العثور على الحقول في الصفحة الحالية
+            const usernameInput = document.querySelector(`input[name="${usernameField}"], input[id="${usernameField}"], input[type="text"]`);
+            const passwordInput = document.querySelector(`input[name="${passwordField}"], input[id="${passwordField}"], input[type="password"]`);
+            
+            if (usernameInput && passwordInput) {
+                log('✅ تم العثور على الحقول في الصفحة الحالية', 'success');
+                
+                // ملء الحقول
+                usernameInput.value = username;
+                passwordInput.value = password;
+                
+                // إطلاق الأحداث
+                ['focus', 'input', 'change', 'blur'].forEach(eventType => {
+                    const event = new Event(eventType, { bubbles: true });
+                    usernameInput.dispatchEvent(event);
+                    passwordInput.dispatchEvent(event);
+                });
+                
+                log('✅ تم ملء الحقول بنجاح!', 'success');
+                updateStatus('✅ تم اختبار التعبئة بنجاح!');
+                
+                if (autoSubmit) {
+                    setTimeout(() => {
+                        const submitBtn = document.querySelector(`button[type="submit"], button[id*="${submitButton}"], input[type="submit"]`);
+                        if (submitBtn) {
+                            log('📤 إرسال النموذج...', 'info');
+                            submitBtn.click();
+                        }
+                    }, 1000);
+                }
+            } else {
+                log('⚠ لم يتم العثور على حقول تسجيل الدخول في الصفحة الحالية', 'warning');
+                log('💡 هذا طبيعي - الصفحة الحالية هي صفحة الوسيطة', 'info');
+            }
+        }
+
+        function openTargetSite() {
+            log('🌐 فتح الموقع المستهدف...', 'info');
+            
+            // إنشاء رابط مع البيانات
+            const targetUrlWithParams = new URL(targetUrl);
+            targetUrlWithParams.searchParams.set('username', username);
+            targetUrlWithParams.searchParams.set('password', password);
+            targetUrlWithParams.searchParams.set('auto_submit', autoSubmit);
+            targetUrlWithParams.searchParams.set('form_id', formId);
+            targetUrlWithParams.searchParams.set('username_field', usernameField);
+            targetUrlWithParams.searchParams.set('password_field', passwordField);
+            targetUrlWithParams.searchParams.set('submit_button', submitButton);
+            
+            // فتح النافذة الجديدة
+            const newWindow = window.open(targetUrlWithParams.toString(), '_blank');
+            
+            if (newWindow) {
+                log('✅ تم فتح الموقع بنجاح', 'success');
+                updateStatus('✅ تم فتح الموقع! استخدم Tampermonkey للتعبئة التلقائية');
+                
+                // إظهار تعليمات Tampermonkey
+                setTimeout(() => {
+                    showInstructions();
+                }, 2000);
+            } else {
+                log('❌ تم حظر النافذة المنبثقة', 'error');
+                updateStatus('❌ تم حظر النافذة المنبثقة. يرجى السماح للنوافذ المنبثقة');
+            }
+        }
+
+        function copyCredentials() {
+            const credentials = `اسم المستخدم: ${username}\nكلمة المرور: ${password}`;
+            
+            navigator.clipboard.writeText(credentials).then(() => {
+                log('✅ تم نسخ البيانات إلى الحافظة', 'success');
+                updateStatus('✅ تم نسخ البيانات! يمكنك لصقها الآن');
+            }).catch(() => {
+                log('❌ فشل نسخ البيانات', 'error');
+                updateStatus('❌ فشل نسخ البيانات. يرجى النسخ يدوياً');
+            });
+        }
+
+        function showInstructions() {
+            const instructions = `
+                <div class="success">
+                    <h3>📋 تعليمات استخدام Tampermonkey:</h3>
+                    <ol style="text-align: right; margin: 10px 0;">
+                        <li>تأكد من تثبيت إضافة Tampermonkey في متصفحك</li>
+                        <li>انسخ محتوى ملف auto-login.user.js</li>
+                        <li>افتح Tampermonkey واختر "Create a new script"</li>
+                        <li>الصق الكود واحفظه</li>
+                        <li>اذهب إلى الموقع المستهدف</li>
+                        <li>سيتم ملء الحقول تلقائياً!</li>
+                    </ol>
+                    <p><strong>أو استخدم الرابط المباشر:</strong></p>
+                    <p><code>${targetUrl}?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&auto_submit=${autoSubmit}</code></p>
+                </div>
+            `;
+            
+            infoEl.innerHTML = instructions;
+            log('📋 تم عرض التعليمات', 'info');
+        }
+
+        // تشغيل عند تحميل الصفحة
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                if (showInfo()) {
+                    updateStatus('✅ تم تحضير البيانات بنجاح!');
+                    log('🚀 النظام جاهز للاستخدام', 'success');
+                } else {
+                    updateStatus('❌ خطأ في البيانات');
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
